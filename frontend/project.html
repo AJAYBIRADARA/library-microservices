@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Library System</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(to right, #667eea, #764ba2);
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  width: 350px;
+  margin: 100px auto;
+  border-radius: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+}
+
+button {
+  padding: 10px;
+  margin-top: 10px;
+  background: #667eea;
+  color: white;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.link {
+  color: blue;
+  cursor: pointer;
+  margin-top: 10px;
+  display: block;
+  text-align: center;
+}
+
+#registerPage, #dashboard {
+  display: none;
+}
+
+.sidebar {
+  width: 200px;
+  height: 100vh;
+  background: #333;
+  color: white;
+  float: left;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  color: white;
+  border: none;
+  text-align: left;
+}
+
+.content {
+  margin-left: 200px;
+  padding: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage" class="box">
+  <h2>Login</h2>
+  <input id="loginUser" placeholder="Username">
+  <input id="loginPass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+
+  <span class="link" onclick="showRegister()">New User? Create Account</span>
+</div>
+
+<!-- REGISTER -->
+<div id="registerPage" class="box">
+  <h2>Create Account</h2>
+
+  <input id="fname" placeholder="First Name">
+  <input id="lname" placeholder="Last Name">
+  <input id="phone" placeholder="Phone">
+  <input id="email" placeholder="Email">
+  <input id="address" placeholder="Address">
+  <input id="username" placeholder="Username">
+  <input id="password" type="password" placeholder="Password">
+  <input id="confirm" type="password" placeholder="Confirm Password">
+
+  <button onclick="register()">Create Account</button>
+  <span class="link" onclick="showLogin()">Back to Login</span>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+
+  <div class="sidebar">
+    <button onclick="show('student')">Student Registration</button>
+    <button onclick="show('book')">Book Service</button>
+    <button onclick="show('issue')">Issue Book</button>
+    <button onclick="show('return')">Return Book</button>
+    <button onclick="show('notify')">Notification</button>
+    <button onclick="show('record')">Check Record</button>
+  </div>
+
+  <div class="content" id="contentArea"></div>
+
+</div>
+
+<script>
+
+// PAGE SWITCH
+function showRegister(){
+  loginPage.style.display="none";
+  registerPage.style.display="block";
+}
+
+function showLogin(){
+  registerPage.style.display="none";
+  loginPage.style.display="block";
+}
+
+// LOGIN
+async function login(){
+  let username = loginUser.value;
+  let password = loginPass.value;
+
+  let res = await fetch("http://localhost:5001/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({username, password})
+  });
+
+  let data = await res.json();
+
+  if(res.status === 200){
+    alert("Login successful");
+    loginPage.style.display="none";
+    dashboard.style.display="block";
+  } else {
+    alert(data.message);
+  }
+}
+
+// REGISTER
+async function register(){
+
+  let pass = document.getElementById("password").value.trim();
+  let confirmPass = document.getElementById("confirm").value.trim();
+
+  console.log("Password:", pass);
+  console.log("Confirm:", confirmPass);
+
+  if(pass !== confirmPass){
+    alert("Passwords do not match");
+    return;
+  }
+
+  let data = {
+    first_name: document.getElementById("fname").value,
+    last_name: document.getElementById("lname").value,
+    phone: document.getElementById("phone").value,
+    email: document.getElementById("email").value,
+    address: document.getElementById("address").value,
+    username: document.getElementById("username").value,
+    password: pass
+  };
+
+  let res = await fetch("http://localhost:5001/register", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(data)
+  });
+
+  let result = await res.json();
+  alert(result.message);
+
+  if(res.status === 200){
+    showLogin();
+  }
+}
+
+// SIDEBAR
+function show(section){
+
+if(section=="student"){
+contentArea.innerHTML=`
+<h2>Student Registration</h2>
+<input placeholder="Full Name">
+<input placeholder="Class">
+<input placeholder="Roll No">
+<input placeholder="Username">
+<input placeholder="Email">
+<button onclick="alert('Student Registered')">Submit</button>
+`;
+}
+
+if(section=="book"){
+contentArea.innerHTML=`
+<h2>Book Service</h2>
+<input id="title" placeholder="Book Name">
+<input id="author" placeholder="Author">
+<input id="deleteId" placeholder="Book ID">
+
+<button onclick="addBook()">Add</button>
+<button onclick="viewBooks()">View</button>
+<button onclick="deleteBook()">Delete</button>
+
+<div id="out"></div>
+`;
+}
+
+if(section=="issue"){
+contentArea.innerHTML=`
+<h2>Issue Book</h2>
+<input id="user" placeholder="Student">
+<input id="book" placeholder="Book">
+<button onclick="issue()">Issue</button>
+`;
+}
+
+if(section=="return"){
+contentArea.innerHTML=`
+<h2>Return Book</h2>
+<input id="ruser" placeholder="Student">
+<input id="rbook" placeholder="Book">
+<button onclick="returnBook()">Return</button>
+`;
+}
+
+if(section=="notify"){
+contentArea.innerHTML=`
+<h2>Notification</h2>
+<input id="msg" placeholder="Message">
+<button onclick="sendNotification()">Send</button>
+`;
+}
+
+if(section=="record"){
+contentArea.innerHTML=`
+<h2>Check Record</h2>
+<input id="recordUser" placeholder="Username">
+<button onclick="checkRecord()">Check</button>
+<div id="recordOutput"></div>
+`;
+}
+
+}
+
+// BOOK
+async function addBook(){
+  await fetch("http://localhost:5002/add-book",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({title:title.value,author:author.value})
+  });
+  alert("Book Added");
+}
+
+async function viewBooks(){
+  let res=await fetch("http://localhost:5002/books");
+  let data=await res.json();
+  out.innerText=JSON.stringify(data);
+}
+
+async function deleteBook(){
+  await fetch(`http://localhost:5002/delete-book/${deleteId.value}`,{
+    method:"DELETE"
+  });
+  alert("Deleted");
+}
+
+// ISSUE
+async function issue(){
+  await fetch("http://localhost:5003/issue",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({user:user.value,book:book.value})
+  });
+  alert("Issued");
+}
+
+// RETURN
+async function returnBook(){
+  await fetch("http://localhost:5003/return",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({user:ruser.value,book:rbook.value})
+  });
+  alert("Returned");
+}
+
+// NOTIFICATION
+async function sendNotification(){
+  let res = await fetch("http://localhost:5005/notify",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({msg:msg.value})
+  });
+
+  let data = await res.json();
+  alert(data.message);
+}
+
+// RECORD
+async function checkRecord(){
+  let res = await fetch(`http://localhost:5006/record/${recordUser.value}`);
+  let data = await res.json();
+
+  let outText="";
+  data.forEach(r=>{
+    outText+=`📚 ${r.book} | ${r.issue_date} | ${r.return_date}<br>`;
+  });
+
+  recordOutput.innerHTML = outText || "No record";
+}
+
+</script>
+
+</body>
+</html>

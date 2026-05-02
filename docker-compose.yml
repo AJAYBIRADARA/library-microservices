@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+
+  user-service:
+    build: ./User-Service
+    ports:
+      - "5001:5001"
+
+  book-service:
+    build: ./Book-Service
+    ports:
+      - "5002:5002"
+
+  issue-service:
+    build: ./Issue-Service
+    ports:
+      - "5003:5003"
+
+  notification-service:
+    build: ./Notification-Service
+    ports:
+      - "5005:5005"
+
+  record-service:
+    build: ./record-service
+    ports:
+      - "5006:5006"
+    depends_on:
+      - issue-service
